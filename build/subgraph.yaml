@@ -1,6 +1,6 @@
 specVersion: 0.0.5
 schema:
-  file: ./schema.graphql
+  file: schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: LSSVMPairFactory
@@ -30,7 +30,7 @@ dataSources:
         - DailyPairStat
       abis:
         - name: LSSVMPairFactory
-          file: ./abis/LSSVMPairFactory.json
+          file: LSSVMPairFactory/abis/LSSVMPairFactory.json
       eventHandlers:
         - event: BondingCurveStatusUpdate(address,bool)
           handler: handleBondingCurveStatusUpdate
@@ -53,7 +53,7 @@ dataSources:
       callHandlers:
         - function: createPairETH(address,address,address,uint8,uint128,uint96,uint128,uint256[])
           handler: handleCreatePairETH
-      file: ./src/lssvm-pair-factory.ts
+      file: LSSVMPairFactory/LSSVMPairFactory.wasm
 templates:
   - kind: ethereum
     name: LSSVMPairEnumerableETH
@@ -81,7 +81,7 @@ templates:
         - DailyPairStat
       abis:
         - name: LSSVMPairEnumerableETH
-          file: ./abis/LSSVMPairEnumerableETH.json
+          file: LSSVMPairEnumerableETH/abis/LSSVMPairEnumerableETH.json
       eventHandlers:
         - event: AssetRecipientChange(address)
           handler: handleAssetRecipientChange
@@ -103,4 +103,4 @@ templates:
           handler: handleTokenDeposit
         - event: TokenWithdrawal(uint256)
           handler: handleTokenWithdrawal
-      file: ./src/lssvm-pair-enumerable-eth.ts
+      file: templates/LSSVMPairEnumerableETH/LSSVMPairEnumerableETH.wasm

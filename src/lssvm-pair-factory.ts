@@ -13,11 +13,20 @@ import {
   TokenDeposit as TokenDepositEvent,
   CreatePairETHCall
 } from "../generated/LSSVMPairFactory/LSSVMPairFactory"
-import { NewPair, Pair, DailyETHPairStat, DailyETHPoolStat, DailyETHProtocolStat, BondingCurveStatusUpdate, ProtocolFeeMultiplier, NFTDeposit, TokenDeposit } from "../generated/schema"
+import { NewPair, Pair, NFT, DailyETHPairStat, DailyETHPoolStat, DailyETHProtocolStat, BondingCurveStatusUpdate, ProtocolFeeMultiplier, NFTDeposit, TokenDeposit } from "../generated/schema"
 import { LSSVMPairEnumerableETH } from "../generated/templates"
 import { plusBigInt, updatePairAttributesIfMissing } from "./utilities"
+import { ethers } from "ethers"
+import chains from "../chains.json";
+import ERC721ABI from "../abis/ERC721.json";
 
-export function handleCreatePairETH(
+const CHAIN = chains[9990];
+
+const provider = new ethers.providers.JsonRpcProvider({
+  url: CHAIN.rpcUrls.default,
+});
+
+export async function handleCreatePairETH(
   event: CreatePairETHCall
 ): void {
   let newPair = NewPair.load(event.transaction.hash.toHexString())
@@ -25,7 +34,23 @@ export function handleCreatePairETH(
   if (!newPair) {
     newPair = new NewPair(event.transaction.hash.toHexString())
   }
-  newPair.nft = event.inputs._nft.toHexString()
+
+  let newNFT = NFT.load(event.inputs._nft.toHexString());
+
+  if (!newNFT) {
+    const nftContract = new ethers.Contract(event.inputs._nft.toHexString(), ERC721ABI, provider);
+
+    const name = await nftContract.name()
+    const symbol = await nftContract.symbol()
+
+    newNFT = new NFT(event.inputs._nft.toHexString());
+    newNFT.contractAddress = event.inputs._nft.toHexString();
+    newNFT.name = name;
+    newNFT.symbol = symbol;
+    newNFT.save();
+  }
+
+  newPair.nft = newNFT.id;
   newPair.initialBondingCurveAddress = event.inputs._bondingCurve.toHexString()
   newPair.initialAssetRecipient = event.inputs._assetRecipient.toHexString()
   newPair.poolType = BigInt.fromI32(event.inputs._poolType)

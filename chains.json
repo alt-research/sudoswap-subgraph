@@ -1,0 +1,23 @@
+{
+    "9990": {
+        "id": 9990,
+        "name": "flashlayer",
+        "network": "flashlayer",
+        "nativeCurrency": {
+            "decimals": 18,
+            "name": "Altcoin",
+            "symbol": "ALT",
+            "imageUrl": "https://altlayer.io/favicon.ico"
+        },
+        "rpcUrls": {
+            "default": "https://acadia2-alt-producer-archive-rpc.altresearch.xyz/"
+        },
+        "blockExplorers": {
+            "default": {
+                "name": "AltExplorer",
+                "url": "https://acadia2-explorer.altresearch.xyz/"
+            }
+        },
+        "testnet": false
+    }
+}
