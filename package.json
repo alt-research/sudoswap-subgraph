@@ -11,9 +11,7 @@
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "^0.35.0",
-    "@graphprotocol/graph-ts": "0.27.0",
-    "@openzeppelin/contracts": "^4.7.3",
-    "ethers": "^5.7.2"
+    "@graphprotocol/graph-ts": "0.27.0"
   },
   "version": "1.0.0",
   "main": "index.js",
