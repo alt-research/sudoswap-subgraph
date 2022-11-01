@@ -17,7 +17,7 @@ type Collection @entity {
   name: String!
   symbol: String!
   pairCount: BigInt!
-  pairs: [Pair!] @derivedFrom(field: "collection")
+  pairs: [Pair!]
   ethBalance: BigInt!
   nftBalance: BigInt!
   nfts: [NFT!]!
