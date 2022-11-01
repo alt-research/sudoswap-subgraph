@@ -53,7 +53,7 @@ export function handleCreatePairETH(
   }
 
   if (event.inputs._initialNFTIDs.length >= 1) {
-    for (let i = 0; i <= event.inputs._initialNFTIDs.length; i++) {
+    for (let i = 0; i <= event.inputs._initialNFTIDs.length - 1; i++) {
       const nftId = event.inputs._initialNFTIDs[i];
       let nft = NFT.load(event.outputs.pair.toHexString() + "-" + nftId.toHexString());
       if (!nft) {
