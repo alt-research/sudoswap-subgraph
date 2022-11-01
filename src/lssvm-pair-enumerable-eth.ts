@@ -223,7 +223,7 @@ export function handleSwapNFTOutPair(event: SwapNFTOutPairEvent): void {
   pair.inventoryCount = pair.inventoryCount!.minus(BigInt.fromI32(1))
   entity.fee = BigInt.fromString(pair.feeMultiplier!.times(pair.spotPrice!.toBigDecimal()).toString().split('.')[0])
   entity.pair = event.address.toHexString()
-  entity.protocolFee = BigInt.fromString(protocolFeeMultiplier.protocolFeeMultiplier.times(pair.spotPrice!.toBigDecimal()).toString().split('.')[0])
+  entity.protocolFee = protocolFeeMultiplier && protocolFeeMultiplier.protocolFeeMultiplier ? BigInt.fromString(protocolFeeMultiplier.protocolFeeMultiplier.times(pair.spotPrice!.toBigDecimal()).toString().split('.')[0]) : BigInt.fromString("0");
   entity.ethReceivedByPool = pair.spotPrice!.minus(entity.protocolFee)
   entity.timestamp = event.block.timestamp
   entity.nft = pair.nft!

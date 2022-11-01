@@ -1,18 +1,26 @@
 type NFT @entity {
   id: ID!
-  contractAddress: String
-  name: String
-  symbol: String
-  description: String
-  image: String
-  external_url: String
-  attributes: [Attribute!]
+  tokenId: BigInt!
+  contractAddress: String!
+  collection: Collection!
+  pair: Pair!
 }
 
 type Attribute @entity {
   id: ID!
   trait_type: String!
   value: String!
+}
+
+type Collection @entity {
+  id: ID!
+  name: String!
+  symbol: String!
+  pairCount: BigInt!
+  pairs: [Pair!] @derivedFrom(field: "collection")
+  ethBalance: BigInt!
+  nftBalance: BigInt!
+  nfts: [NFT!]!
 }
 
 type NewPair @entity {
