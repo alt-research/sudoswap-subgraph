@@ -55,18 +55,18 @@ export function handleCreatePairETH(
   if (event.inputs._initialNFTIDs.length >= 1) {
     for (let i = 0; i <= event.inputs._initialNFTIDs.length - 1; i++) {
       const nftId = event.inputs._initialNFTIDs[i];
-      let nft = NFT.load(event.outputs.pair.toHexString() + "-" + nftId.toHexString());
+      let nft = NFT.load(event.outputs.pair.toHexString() + "-" + nftId.toString());
       if (!nft) {
-        nft = new NFT(nftId.toHexString());
+        nft = new NFT(event.outputs.pair.toHexString() + "-" + nftId.toString());
         nft.tokenId = nftId;
         nft.contractAddress = event.inputs._nft.toHexString();
         nft.pair = event.outputs.pair.toHexString();
         nft.collection = event.inputs._nft.toHexString();
         nft.save();
-
-        newCollection.nfts.push(nft.id);
-        newCollection.save();
       }
+
+      newCollection.nfts.push(nft.id);
+      newCollection.save();
     }
   }
 
