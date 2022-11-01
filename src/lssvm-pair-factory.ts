@@ -13,27 +13,19 @@ import {
   TokenDeposit as TokenDepositEvent,
   CreatePairETHCall
 } from "../generated/LSSVMPairFactory/LSSVMPairFactory"
-import { NewPair, Pair, NFT, DailyETHPairStat, DailyETHPoolStat, DailyETHProtocolStat, BondingCurveStatusUpdate, ProtocolFeeMultiplier, NFTDeposit, TokenDeposit } from "../generated/schema"
+import { NewPair, Pair, NFT, DailyETHPairStat, DailyETHPoolStat, DailyETHProtocolStat, BondingCurveStatusUpdate, ProtocolFeeMultiplier, NFTDeposit, TokenDeposit, Collection } from "../generated/schema"
 import { LSSVMPairEnumerableETH } from "../generated/templates"
 import { plusBigInt, updatePairAttributesIfMissing } from "./utilities"
 
 export function handleCreatePairETH(
   event: CreatePairETHCall
 ): void {
-  let newPair = NewPair.load(event.transaction.hash.toHexString())
-  // todo: initial and current pair attributes/counts
+  let newPair = NewPair.load(event.outputs.pair.toHexString());
   if (!newPair) {
-    newPair = new NewPair(event.transaction.hash.toHexString())
+    newPair = new NewPair(event.outputs.pair.toHexString())
   }
 
-  let newNFT = NFT.load(event.inputs._nft.toHexString());
-  
-  if (!newNFT) {
-    newNFT = new NFT(event.inputs._nft.toHexString());
-    newNFT.save();
-  }
-
-  newPair.nft = newNFT.id;
+  newPair.nft = event.inputs._nft.toHexString();
   newPair.initialBondingCurveAddress = event.inputs._bondingCurve.toHexString()
   newPair.initialAssetRecipient = event.inputs._assetRecipient.toHexString()
   newPair.poolType = BigInt.fromI32(event.inputs._poolType)
@@ -45,6 +37,39 @@ export function handleCreatePairETH(
   newPair.initialETHLiquidity = event.transaction.value
   newPair.owner = event.from.toHexString()
   newPair.save()
+
+  let newCollection = Collection.load(event.inputs._nft.toHexString());
+  if (!newCollection) {
+    newCollection = new Collection(event.inputs._nft.toHexString());
+    newCollection.pairs = [newPair.id];
+    newCollection.pairCount = BigInt.fromI32(0);
+    newCollection.nfts = [];
+    newCollection.save();
+  }
+
+  if (!newCollection.pairs.includes(newPair.id)) {
+    newCollection.pairCount = plusBigInt(newCollection.pairCount, BigInt.fromI32(1));
+    newCollection.pairs.push(newPair.id);
+  }
+
+  if (event.inputs._initialNFTIDs.length >= 1) {
+    for (let i = 0; i <= event.inputs._initialNFTIDs.length; i++) {
+      const nftId = event.inputs._initialNFTIDs[i];
+      let nft = NFT.load(event.outputs.pair.toHexString() + "-" + nftId.toHexString());
+      if (!nft) {
+        nft = new NFT(nftId.toHexString());
+        nft.tokenId = nftId;
+        nft.contractAddress = event.inputs._nft.toHexString();
+        nft.pair = event.outputs.pair.toHexString();
+        nft.collection = event.inputs._nft.toHexString();
+        nft.save();
+
+        newCollection.nfts.push(nft.id);
+        newCollection.save();
+      }
+    }
+  }
+
   const dayString = new Date(event.block.timestamp.toI64() * 1000).toISOString().slice(0, 10).replaceAll("-", "")
   let poolStats = DailyETHPoolStat.load(newPair.nft + "-" + dayString)
   // todo: initial and current pair attributes/counts

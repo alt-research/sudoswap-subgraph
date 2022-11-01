@@ -3,7 +3,7 @@ import { NewPair, Pair } from "../generated/schema"
 
 export function updatePairAttributesIfMissing(pair: Pair): Pair {
     if (!pair.spotPrice || !pair.nft) {
-        let newPair = NewPair.load(pair.createdTx!)!
+        let newPair = NewPair.load(pair.id)!
         pair.assetRecipient = pair.assetRecipient || newPair.initialAssetRecipient
         pair.bondingCurveAddress = pair.bondingCurveAddress || newPair.initialBondingCurveAddress
         pair.delta = pair.delta || newPair.initialDelta

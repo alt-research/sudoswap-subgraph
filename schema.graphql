@@ -2,8 +2,8 @@ type NFT @entity {
   id: ID!
   tokenId: BigInt!
   contractAddress: String!
-  collection: Collection!
-  pair: Pair!
+  collection: Collection
+  pair: Pair
 }
 
 type Attribute @entity {
@@ -14,12 +14,8 @@ type Attribute @entity {
 
 type Collection @entity {
   id: ID!
-  name: String!
-  symbol: String!
   pairCount: BigInt!
-  pairs: [Pair!]
-  ethBalance: BigInt!
-  nftBalance: BigInt!
+  pairs: [Pair!]!
   nfts: [NFT!]!
 }
 

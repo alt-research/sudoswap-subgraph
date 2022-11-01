@@ -42,8 +42,26 @@ export class NFT extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get contractAddress(): string | null {
+  get tokenId(): BigInt {
+    let value = this.get("tokenId");
+    return value!.toBigInt();
+  }
+
+  set tokenId(value: BigInt) {
+    this.set("tokenId", Value.fromBigInt(value));
+  }
+
+  get contractAddress(): string {
     let value = this.get("contractAddress");
+    return value!.toString();
+  }
+
+  set contractAddress(value: string) {
+    this.set("contractAddress", Value.fromString(value));
+  }
+
+  get collection(): string | null {
+    let value = this.get("collection");
     if (!value || value.kind == ValueKind.NULL) {
       return null;
     } else {
@@ -51,16 +69,16 @@ export class NFT extends Entity {
     }
   }
 
-  set contractAddress(value: string | null) {
+  set collection(value: string | null) {
     if (!value) {
-      this.unset("contractAddress");
+      this.unset("collection");
     } else {
-      this.set("contractAddress", Value.fromString(<string>value));
+      this.set("collection", Value.fromString(<string>value));
     }
   }
 
-  get name(): string | null {
-    let value = this.get("name");
+  get pair(): string | null {
+    let value = this.get("pair");
     if (!value || value.kind == ValueKind.NULL) {
       return null;
     } else {
@@ -68,96 +86,11 @@ export class NFT extends Entity {
     }
   }
 
-  set name(value: string | null) {
+  set pair(value: string | null) {
     if (!value) {
-      this.unset("name");
+      this.unset("pair");
     } else {
-      this.set("name", Value.fromString(<string>value));
-    }
-  }
-
-  get symbol(): string | null {
-    let value = this.get("symbol");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set symbol(value: string | null) {
-    if (!value) {
-      this.unset("symbol");
-    } else {
-      this.set("symbol", Value.fromString(<string>value));
-    }
-  }
-
-  get description(): string | null {
-    let value = this.get("description");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set description(value: string | null) {
-    if (!value) {
-      this.unset("description");
-    } else {
-      this.set("description", Value.fromString(<string>value));
-    }
-  }
-
-  get image(): string | null {
-    let value = this.get("image");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set image(value: string | null) {
-    if (!value) {
-      this.unset("image");
-    } else {
-      this.set("image", Value.fromString(<string>value));
-    }
-  }
-
-  get external_url(): string | null {
-    let value = this.get("external_url");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set external_url(value: string | null) {
-    if (!value) {
-      this.unset("external_url");
-    } else {
-      this.set("external_url", Value.fromString(<string>value));
-    }
-  }
-
-  get attributes(): Array<string> | null {
-    let value = this.get("attributes");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toStringArray();
-    }
-  }
-
-  set attributes(value: Array<string> | null) {
-    if (!value) {
-      this.unset("attributes");
-    } else {
-      this.set("attributes", Value.fromStringArray(<Array<string>>value));
+      this.set("pair", Value.fromString(<string>value));
     }
   }
 }
@@ -209,6 +142,65 @@ export class Attribute extends Entity {
 
   set value(value: string) {
     this.set("value", Value.fromString(value));
+  }
+}
+
+export class Collection extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save Collection entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type Collection must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("Collection", id.toString(), this);
+    }
+  }
+
+  static load(id: string): Collection | null {
+    return changetype<Collection | null>(store.get("Collection", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get pairCount(): BigInt {
+    let value = this.get("pairCount");
+    return value!.toBigInt();
+  }
+
+  set pairCount(value: BigInt) {
+    this.set("pairCount", Value.fromBigInt(value));
+  }
+
+  get pairs(): Array<string> {
+    let value = this.get("pairs");
+    return value!.toStringArray();
+  }
+
+  set pairs(value: Array<string>) {
+    this.set("pairs", Value.fromStringArray(value));
+  }
+
+  get nfts(): Array<string> {
+    let value = this.get("nfts");
+    return value!.toStringArray();
+  }
+
+  set nfts(value: Array<string>) {
+    this.set("nfts", Value.fromStringArray(value));
   }
 }
 
