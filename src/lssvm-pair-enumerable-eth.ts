@@ -104,9 +104,9 @@ export function handleNFTWithdrawal(event: NFTWithdrawalEvent): void {
   }
   dailyPairStats.nftsWithdrawn = plusBigInt(dailyPairStats.nftsWithdrawn, BigInt.fromI32(1))
 
-  let dailyPoolStats = DailyETHPoolStat.load(pair.nft + "-" + dayString)
+  let dailyPoolStats = DailyETHPoolStat.load(pair.collection + "-" + dayString)
   if (!dailyPoolStats) {
-    dailyPoolStats = new DailyETHPoolStat(pair.nft + "-" + dayString)
+    dailyPoolStats = new DailyETHPoolStat(pair.collection + "-" + dayString)
     dailyPoolStats.nftsWithdrawn = BigInt.fromI32(0)
   }
   dailyPoolStats.nftsWithdrawn = plusBigInt(dailyPoolStats.nftsWithdrawn, BigInt.fromI32(1))
@@ -146,7 +146,7 @@ export function handleSpotPriceUpdate(event: SpotPriceUpdateEvent): void {
     pair.spotPrice = event.params.newSpotPrice
     pair.updatedAt = event.block.timestamp
     pair.save()
-    entity.nft = pair.nft
+    entity.nft = pair.collection
   }
   entity.save()
 }
@@ -163,7 +163,7 @@ export function handleSwapNFTInPair(event: SwapNFTInPairEvent): void {
   entity.protocolFee = BigInt.fromString(protocolFeeMultiplier.times(pair.spotPrice!.toBigDecimal()).toString().split('.')[0])
   entity.ethPaidByPool = pair.spotPrice!
   entity.timestamp = event.block.timestamp
-  entity.nft = pair.nft!
+  entity.nft = pair.collection!
   entity.save()
   const dayString = new Date(entity.timestamp.toI64() * 1000).toISOString().slice(0, 10).replaceAll("-", "")
   let dailyETHProtocolStats = DailyETHProtocolStat.load(dayString)
@@ -184,7 +184,7 @@ export function handleSwapNFTInPair(event: SwapNFTInPairEvent): void {
   }
   dailyPairStats.dayString = dayString
   dailyPairStats.pair = entity.pair
-  dailyPairStats.nftContract = pair.nft
+  dailyPairStats.nftContract = pair.collection
   dailyPairStats.numSwaps = plusBigInt(dailyPairStats.numSwaps, BigInt.fromI32(1))
   dailyPairStats.numUserSells = plusBigInt(dailyPairStats.numUserSells, BigInt.fromI32(1))
   dailyPairStats.swapVolumeETH = plusBigInt(dailyPairStats.swapVolumeETH, pair.spotPrice)
@@ -198,7 +198,7 @@ export function handleSwapNFTInPair(event: SwapNFTInPairEvent): void {
     dailyPoolStats = new DailyETHPoolStat(entity.nft + "-" + dayString)
   }
   dailyPoolStats.dayString = dayString
-  dailyPoolStats.nftContract = pair.nft
+  dailyPoolStats.nftContract = pair.collection
   dailyPoolStats.numSwaps = plusBigInt(dailyPoolStats.numSwaps, BigInt.fromI32(1))
   dailyPoolStats.numUserSells = plusBigInt(dailyPoolStats.numUserSells, BigInt.fromI32(1))
   dailyPoolStats.swapVolumeETH = plusBigInt(dailyPoolStats.swapVolumeETH, pair.spotPrice)
@@ -223,10 +223,18 @@ export function handleSwapNFTOutPair(event: SwapNFTOutPairEvent): void {
   pair.inventoryCount = pair.inventoryCount!.minus(BigInt.fromI32(1))
   entity.fee = BigInt.fromString(pair.feeMultiplier!.times(pair.spotPrice!.toBigDecimal()).toString().split('.')[0])
   entity.pair = event.address.toHexString()
-  entity.protocolFee = protocolFeeMultiplier && protocolFeeMultiplier.protocolFeeMultiplier ? BigInt.fromString(protocolFeeMultiplier.protocolFeeMultiplier.times(pair.spotPrice!.toBigDecimal()).toString().split('.')[0]) : BigInt.fromString("0");
+
+  entity.protocolFee = protocolFeeMultiplier &&
+    protocolFeeMultiplier.protocolFeeMultiplier ?
+    BigInt.fromString(
+      protocolFeeMultiplier.protocolFeeMultiplier.times(
+        pair.spotPrice!.toBigDecimal()
+      ).toString().split('.')[0]
+    ) : BigInt.fromString("0");
+
   entity.ethReceivedByPool = pair.spotPrice!.minus(entity.protocolFee)
   entity.timestamp = event.block.timestamp
-  entity.nft = pair.nft!
+  entity.nft = pair.collection!
   entity.save()
   const dayString = new Date(entity.timestamp.toI64() * 1000).toISOString().slice(0, 10).replaceAll("-", "")
   let dailyETHProtocolStats = DailyETHProtocolStat.load(dayString)
@@ -247,7 +255,7 @@ export function handleSwapNFTOutPair(event: SwapNFTOutPairEvent): void {
   }
   dailyPairStats.dayString = dayString
   dailyPairStats.pair = entity.pair
-  dailyPairStats.nftContract = pair.nft
+  dailyPairStats.nftContract = pair.collection
   dailyPairStats.numSwaps = plusBigInt(dailyPairStats.numSwaps, BigInt.fromI32(1))
   dailyPairStats.numUserBuys = plusBigInt(dailyPairStats.numUserBuys, BigInt.fromI32(1))
   dailyPairStats.swapVolumeETH = plusBigInt(dailyPairStats.swapVolumeETH, pair.spotPrice)
@@ -260,7 +268,7 @@ export function handleSwapNFTOutPair(event: SwapNFTOutPairEvent): void {
     dailyPoolStats = new DailyETHPoolStat(entity.nft + "-" + dayString)
   }
   dailyPoolStats.dayString = dayString
-  dailyPoolStats.nftContract = pair.nft
+  dailyPoolStats.nftContract = pair.collection
   dailyPoolStats.numSwaps = plusBigInt(dailyPoolStats.numSwaps, BigInt.fromI32(1))
   dailyPoolStats.numUserBuys = plusBigInt(dailyPoolStats.numUserBuys, BigInt.fromI32(1))
   dailyPoolStats.swapVolumeETH = plusBigInt(dailyPoolStats.swapVolumeETH, pair.spotPrice)
@@ -304,9 +312,9 @@ export function handleTokenDeposit(
   }
   dailyPairStats.ethDeposited = plusBigInt(dailyPairStats.ethDeposited, entity.amountDeposited)
 
-  let dailyPoolStats = DailyETHPoolStat.load(pair.nft + "-" + dayString)
+  let dailyPoolStats = DailyETHPoolStat.load(pair.collection + "-" + dayString)
   if (!dailyPoolStats) {
-    dailyPoolStats = new DailyETHPoolStat(pair.nft + "-" + dayString)
+    dailyPoolStats = new DailyETHPoolStat(pair.collection + "-" + dayString)
     dailyPoolStats.ethDeposited = BigInt.fromI32(0)
   }
   dailyPoolStats.ethDeposited = plusBigInt(dailyPoolStats.ethDeposited, entity.amountDeposited)
@@ -341,9 +349,9 @@ export function handleTokenWithdrawal(event: TokenWithdrawalEvent): void {
   }
   dailyPairStats.ethWithdrawn = plusBigInt(dailyPairStats.ethWithdrawn, entity.amountWithdrawn)
 
-  let dailyPoolStats = DailyETHPoolStat.load(pair.nft + "-" + dayString)
+  let dailyPoolStats = DailyETHPoolStat.load(pair.collection + "-" + dayString)
   if (!dailyPoolStats) {
-    dailyPoolStats = new DailyETHPoolStat(pair.nft + "-" + dayString)
+    dailyPoolStats = new DailyETHPoolStat(pair.collection + "-" + dayString)
     dailyPoolStats.ethWithdrawn = BigInt.fromI32(0)
   }
   dailyPoolStats.ethWithdrawn = plusBigInt(dailyPoolStats.ethWithdrawn, entity.amountWithdrawn)

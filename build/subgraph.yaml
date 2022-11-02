@@ -4,11 +4,10 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: LSSVMPairFactory
-    network: mainnet
+    network: goerli
     source:
-      address: "0xb16c1342E617A5B6E4b631EB114483FDB289c0A4"
       abi: LSSVMPairFactory
-      startBlock: 14645793
+      address: "0x9ebeE53af7210aa2547212B3AC73F6C749313343"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -57,7 +56,7 @@ dataSources:
 templates:
   - kind: ethereum
     name: LSSVMPairEnumerableETH
-    network: mainnet
+    network: goerli
     source:
       abi: LSSVMPairEnumerableETH
     mapping:

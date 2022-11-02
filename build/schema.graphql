@@ -46,7 +46,8 @@ type Pair @entity {
   createdTx: String
   createdAt: BigInt
   updatedAt: BigInt
-  nft: NFT
+  nfts: [NFT!]!
+  collection: Collection
   bondingCurveAddress: String
   assetRecipient: String
   poolType: BigInt
@@ -54,6 +55,8 @@ type Pair @entity {
   feeMultiplier: BigDecimal
   spotPrice: BigInt
   nftIdInventory: [BigInt!]
+  nftBalance: BigInt
+  ethBalance: BigInt
   inventoryCount: BigInt
   ethLiquidity: BigInt
   initialAttributes: NewPair

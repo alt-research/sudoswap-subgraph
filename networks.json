@@ -15,5 +15,19 @@
     "LSSVMPairMissingEnumerableETH": {
       "address": "0xCd80C916B1194beB48aBF007D0b79a7238436D56"
     }
+  },
+  "goerli": {
+    "LSSVMPairFactory": {
+      "address": "0x9ebeE53af7210aa2547212B3AC73F6C749313343"
+    },
+    "LSSVMPairEnumerableETH": {
+      "address": "0x986B795857f099ed12A75F47aBe9E22F527AD5F2"
+    },
+    "LSSVMRouter": {
+      "address": "0x0bC551f50655391ab4efCb17b54A75a9bd0D30c1"
+    },
+    "LSSVMPairMissingEnumerableETH": {
+      "address": "0xf7798823fBDDFB4B71E44ff08EE7A9BEd2fd985e"
+    }
   }
 }

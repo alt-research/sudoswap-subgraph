@@ -20,36 +20,40 @@ import { plusBigInt, updatePairAttributesIfMissing } from "./utilities"
 export function handleCreatePairETH(
   event: CreatePairETHCall
 ): void {
-  let newPair = NewPair.load(event.outputs.pair.toHexString());
-  if (!newPair) {
-    newPair = new NewPair(event.outputs.pair.toHexString())
-  }
-
-  newPair.nft = event.inputs._nft.toHexString();
-  newPair.initialBondingCurveAddress = event.inputs._bondingCurve.toHexString()
-  newPair.initialAssetRecipient = event.inputs._assetRecipient.toHexString()
-  newPair.poolType = BigInt.fromI32(event.inputs._poolType)
-  newPair.initialDelta = event.inputs._delta
-  newPair.initialFeeMultiplier = event.inputs._fee.toBigDecimal().div(BigDecimal.fromString((Math.pow(10, 18)).toString()))
-  newPair.initialSpotPrice = event.inputs._spotPrice
-  newPair.initialNFTIdInventory = event.inputs._initialNFTIDs
-  newPair.initialInventoryCount = BigInt.fromI32(event.inputs._initialNFTIDs.length)
-  newPair.initialETHLiquidity = event.transaction.value
-  newPair.owner = event.from.toHexString()
-  newPair.save()
 
   let newCollection = Collection.load(event.inputs._nft.toHexString());
   if (!newCollection) {
     newCollection = new Collection(event.inputs._nft.toHexString());
-    newCollection.pairs = [newPair.id];
+    newCollection.pairs = [];
     newCollection.pairCount = BigInt.fromI32(0);
     newCollection.nfts = [];
     newCollection.save();
   }
 
+  let newPair = Pair.load(event.outputs.pair.toHexString());
+  if (!newPair) {
+    newPair = new Pair(event.outputs.pair.toHexString())
+  }
+
+  newPair.bondingCurveAddress = event.inputs._bondingCurve.toHexString()
+  newPair.assetRecipient = event.inputs._assetRecipient.toHexString()
+  newPair.poolType = BigInt.fromI32(event.inputs._poolType)
+  newPair.delta = event.inputs._delta
+  newPair.feeMultiplier = event.inputs._fee.toBigDecimal().div(BigDecimal.fromString((Math.pow(10, 18)).toString()))
+  newPair.spotPrice = event.inputs._spotPrice
+  newPair.nftIdInventory = event.inputs._initialNFTIDs
+  newPair.nfts = []
+  newPair.nftBalance = BigInt.fromI32(event.inputs._initialNFTIDs.length)
+  newPair.ethBalance = event.transaction.value
+  newPair.owner = event.from.toHexString()
+  newPair.collection = newCollection.id
+  newPair.save()
+
+  // Update Collection pairs and pairCount
   if (!newCollection.pairs.includes(newPair.id)) {
     newCollection.pairCount = plusBigInt(newCollection.pairCount, BigInt.fromI32(1));
     newCollection.pairs.push(newPair.id);
+    newCollection.save();
   }
 
   if (event.inputs._initialNFTIDs.length >= 1) {
@@ -65,18 +69,21 @@ export function handleCreatePairETH(
         nft.save();
       }
 
+      newPair.nfts.push(nft.id);
+      newPair.save();
+
       newCollection.nfts.push(nft.id);
       newCollection.save();
     }
   }
 
   const dayString = new Date(event.block.timestamp.toI64() * 1000).toISOString().slice(0, 10).replaceAll("-", "")
-  let poolStats = DailyETHPoolStat.load(newPair.nft + "-" + dayString)
+  let poolStats = DailyETHPoolStat.load(newPair.collection + "-" + dayString)
   // todo: initial and current pair attributes/counts
   if (!poolStats) {
-    poolStats = new DailyETHPoolStat(newPair.nft + "-" + dayString)
+    poolStats = new DailyETHPoolStat(newPair.collection + "-" + dayString)
     poolStats.dayString = dayString
-    poolStats.nftContract = newPair.nft
+    poolStats.nftContract = newPair.collection
   }
   poolStats.ethDeposited = plusBigInt(event.transaction.value, poolStats.ethDeposited)
   poolStats.nftsDeposited = plusBigInt(BigInt.fromI32(event.inputs._initialNFTIDs.length), poolStats.nftsDeposited)
@@ -95,17 +102,7 @@ export function handleCreatePairETH(
 }
 
 export function handleNewPairEvent(event: NewPairEvent): void {
-  LSSVMPairEnumerableETH.create(event.params.poolAddress)
-  let pair = Pair.load(event.params.poolAddress.toHexString())
-  if (!pair) {
-    pair = new Pair(event.params.poolAddress.toHexString())
-  }
-  pair.createdAt = event.block.timestamp
-  pair.updatedAt = event.block.timestamp
-  pair.createdTx = event.transaction.hash.toHexString()
-  pair.owner = event.transaction.from.toHexString()
-  pair.initialAttributes = event.transaction.hash.toHexString()
-  pair.save()
+
 }
 
 export function handleBondingCurveStatusUpdate(
@@ -137,9 +134,9 @@ export function handleNFTDeposit(event: NFTDepositEvent): void {
   }
   dailyPairStats.nftsDeposited = plusBigInt(dailyPairStats.nftsDeposited, BigInt.fromI32(1))
 
-  let dailyPoolStats = DailyETHPoolStat.load(pair.nft + "-" + dayString)
+  let dailyPoolStats = DailyETHPoolStat.load(pair.collection + "-" + dayString)
   if (!dailyPoolStats) {
-    dailyPoolStats = new DailyETHPoolStat(pair.nft + "-" + dayString)
+    dailyPoolStats = new DailyETHPoolStat(pair.collection + "-" + dayString)
     dailyPoolStats.nftsDeposited = BigInt.fromI32(0)
   }
   dailyPoolStats.nftsDeposited = plusBigInt(dailyPoolStats.nftsDeposited, BigInt.fromI32(1))
@@ -154,7 +151,9 @@ export function handleProtocolFeeMultiplierUpdate(
   event: ProtocolFeeMultiplierUpdate
 ): void {
   let protocolFee = new ProtocolFeeMultiplier("current")
-  protocolFee.protocolFeeMultiplier = event.params.newMultiplier.toBigDecimal().div(BigDecimal.fromString((Math.pow(10, 18)).toString()))
+  protocolFee.protocolFeeMultiplier = event.params.newMultiplier.toBigDecimal().div(
+    BigDecimal.fromString((Math.pow(10, 18)).toString())
+  )
   protocolFee.save()
 }
 
@@ -190,9 +189,9 @@ export function handleTokenDeposit(event: TokenDepositEvent): void {
   }
   dailyPairStats.ethDeposited = plusBigInt(dailyPairStats.ethDeposited, entity.amountDeposited)
 
-  let dailyPoolStats = DailyETHPoolStat.load(pair.nft + "-" + dayString)
+  let dailyPoolStats = DailyETHPoolStat.load(pair.collection + "-" + dayString)
   if (!dailyPoolStats) {
-    dailyPoolStats = new DailyETHPoolStat(pair.nft + "-" + dayString)
+    dailyPoolStats = new DailyETHPoolStat(pair.collection + "-" + dayString)
     dailyPoolStats.ethDeposited = BigInt.fromI32(0)
   }
   dailyPoolStats.ethDeposited = plusBigInt(dailyPoolStats.ethDeposited, entity.amountDeposited)

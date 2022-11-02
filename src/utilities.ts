@@ -2,14 +2,14 @@ import { BigInt } from "@graphprotocol/graph-ts"
 import { NewPair, Pair } from "../generated/schema"
 
 export function updatePairAttributesIfMissing(pair: Pair): Pair {
-    if (!pair.spotPrice || !pair.nft) {
+    if (!pair.spotPrice || !pair.collection) {
         let newPair = NewPair.load(pair.id)!
         pair.assetRecipient = pair.assetRecipient || newPair.initialAssetRecipient
         pair.bondingCurveAddress = pair.bondingCurveAddress || newPair.initialBondingCurveAddress
         pair.delta = pair.delta || newPair.initialDelta
         pair.feeMultiplier = pair.feeMultiplier || newPair.initialFeeMultiplier
         pair.inventoryCount = pair.inventoryCount || newPair.initialInventoryCount
-        pair.nft = pair.nft || newPair.nft
+        pair.collection = pair.collection || newPair.nft
         pair.owner = pair.owner || newPair.owner
         pair.poolType = pair.poolType || newPair.poolType
         pair.spotPrice = pair.spotPrice || newPair.initialSpotPrice

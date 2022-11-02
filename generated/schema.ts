@@ -619,8 +619,17 @@ export class Pair extends Entity {
     }
   }
 
-  get nft(): string | null {
-    let value = this.get("nft");
+  get nfts(): Array<string> {
+    let value = this.get("nfts");
+    return value!.toStringArray();
+  }
+
+  set nfts(value: Array<string>) {
+    this.set("nfts", Value.fromStringArray(value));
+  }
+
+  get collection(): string | null {
+    let value = this.get("collection");
     if (!value || value.kind == ValueKind.NULL) {
       return null;
     } else {
@@ -628,11 +637,11 @@ export class Pair extends Entity {
     }
   }
 
-  set nft(value: string | null) {
+  set collection(value: string | null) {
     if (!value) {
-      this.unset("nft");
+      this.unset("collection");
     } else {
-      this.set("nft", Value.fromString(<string>value));
+      this.set("collection", Value.fromString(<string>value));
     }
   }
 
@@ -752,6 +761,40 @@ export class Pair extends Entity {
       this.unset("nftIdInventory");
     } else {
       this.set("nftIdInventory", Value.fromBigIntArray(<Array<BigInt>>value));
+    }
+  }
+
+  get nftBalance(): BigInt | null {
+    let value = this.get("nftBalance");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set nftBalance(value: BigInt | null) {
+    if (!value) {
+      this.unset("nftBalance");
+    } else {
+      this.set("nftBalance", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
+  get ethBalance(): BigInt | null {
+    let value = this.get("ethBalance");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set ethBalance(value: BigInt | null) {
+    if (!value) {
+      this.unset("ethBalance");
+    } else {
+      this.set("ethBalance", Value.fromBigInt(<BigInt>value));
     }
   }
 
