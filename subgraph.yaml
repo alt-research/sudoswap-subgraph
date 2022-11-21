@@ -53,53 +53,57 @@ dataSources:
         - function: createPairETH(address,address,address,uint8,uint128,uint96,uint128,uint256[])
           handler: handleCreatePairETH
       file: ./src/lssvm-pair-factory.ts
-templates:
-  - kind: ethereum
-    name: LSSVMPairEnumerableETH
+  - kind: ethereum/contract
+    name: LSSVMRouter
     network: goerli
     source:
-      abi: LSSVMPairEnumerableETH
+      abi: LSSVMRouter
+      address: "0x0bC551f50655391ab4efCb17b54A75a9bd0D30c1"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - AssetRecipientChange
-        - DeltaUpdate
-        - FeeUpdate
-        - NFTWithdrawal
+        - BondingCurveStatusUpdate
+        - CallTargetStatusUpdate
+        - NFTDeposit
+        - NewPair
         - OwnershipTransferred
-        - SpotPrice
-        - PoolNFTBuy
-        - PoolNFTSale
+        - ProtocolFeeMultiplierUpdate
+        - ProtocolFeeRecipientUpdate
+        - RouterStatusUpdate
         - TokenDeposit
-        - TokenWithdrawal
+        - NFT
         - Pair
         - DailyProtocolStat
         - DailyPoolStat
         - DailyPairStat
       abis:
-        - name: LSSVMPairEnumerableETH
-          file: ./abis/LSSVMPairEnumerableETH.json
-      eventHandlers:
-        - event: AssetRecipientChange(address)
-          handler: handleAssetRecipientChange
-        - event: DeltaUpdate(uint128)
-          handler: handleDeltaUpdate
-        - event: FeeUpdate(uint96)
-          handler: handleFeeUpdate
-        - event: NFTWithdrawal()
-          handler: handleNFTWithdrawal
-        - event: OwnershipTransferred(indexed address)
-          handler: handleOwnershipTransferred
-        - event: SpotPriceUpdate(uint128)
-          handler: handleSpotPriceUpdate
-        - event: SwapNFTInPair()
-          handler: handleSwapNFTInPair
-        - event: SwapNFTOutPair()
-          handler: handleSwapNFTOutPair
-        - event: TokenDeposit(uint256)
-          handler: handleTokenDeposit
-        - event: TokenWithdrawal(uint256)
-          handler: handleTokenWithdrawal
-      file: ./src/lssvm-pair-enumerable-eth.ts
+        - name: LSSVMRouter
+          file: ./abis/LSSVMRouter.json
+      callHandlers:
+        - function: pairTransferERC20From(address,address,address,uint256,uint8)
+          handler: handle_pairTransferERC20From
+        - function: pairTransferNFTFrom(address,address,address,uint256,uint8)
+          handler: handle_pairTransferNFTFrom
+        - function: robustSwapERC20ForAnyNFTs(((address,uint256),uint256)[],uint256,address,uint256)
+          handler: handle_robustSwapERC20ForAnyNFTs
+        - function: robustSwapERC20ForSpecificNFTs(((address,uint256[]),uint256)[],uint256,address,uint256)
+          handler: handle_robustSwapERC20ForSpecificNFTs
+        - function: robustSwapETHForAnyNFTs(((address,uint256),uint256)[],address,address,uint256)
+          handler: handle_robustSwapETHForAnyNFTs
+        - function: robustSwapETHForSpecificNFTs(((address,uint256[]),uint256)[],address,address,uint256)
+          handler: handle_robustSwapETHForSpecificNFTs
+        - function: robustSwapNFTsForToken(((address,uint256[]),uint256)[],address,uint256)
+          handler: handle_robustSwapNFTsForToken
+        - function: swapERC20ForAnyNFTs((address,uint256)[],uint256,address,uint256)
+          handler: handle_swapETC20ForAnyNFTs
+        - function: swapERC20ForSpecificNFTs((address,uint256[])[],uint256,address,uint256)
+          handler: handle_swapERC20ForSpecificNFTs
+        - function: swapETHForAnyNFTs((address,uint256)[],address,address,uint256)
+          handler: handle_swapETHForAnyNFTs
+        - function: swapETHForSpecificNFTs((address,uint256[])[],address,address,uint256)
+          handler: handle_swapETHForSpecificNFTs
+        - function: swapNFTsForToken((address,uint256[])[],uint256,address,uint256)
+          handler: handle_swapNFTsForToken
+      file: ./src/lssvm-pair-factory.ts

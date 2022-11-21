@@ -52,7 +52,7 @@ export function handleCreatePairETH(
   // Update Collection pairs and pairCount
   if (!newCollection.pairs.includes(newPair.id)) {
     newCollection.pairCount = plusBigInt(newCollection.pairCount, BigInt.fromI32(1));
-    newCollection.pairs.push(newPair.id);
+    newCollection.pairs = newCollection.pairs.concat([newPair.id]);
     newCollection.save();
   }
 
@@ -69,10 +69,10 @@ export function handleCreatePairETH(
         nft.save();
       }
 
-      newPair.nfts.push(nft.id);
+      newPair.nfts = newPair.nfts.concat([nft.id]);
       newPair.save();
 
-      newCollection.nfts.push(nft.id);
+      newCollection.nfts = newCollection.nfts.concat([nft.id]);
       newCollection.save();
     }
   }
@@ -198,4 +198,8 @@ export function handleTokenDeposit(event: TokenDepositEvent): void {
   dailyETHProtocolStats.save()
   dailyPairStats.save()
   dailyPoolStats.save()
+}
+
+export function handleSwapTokenForSpecificNFTs(call: ): void {
+  
 }
